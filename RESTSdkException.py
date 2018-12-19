@@ -14,3 +14,6 @@ class WrongDataException(RESTSdkException):
 
 class WrongJsonException(RESTSdkException):
     pass
+
+class WrongDataBaseException(RESTSdkException):
+    pass

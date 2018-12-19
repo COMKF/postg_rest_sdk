@@ -1,6 +1,6 @@
 import requests
 
-from postg_rest_sdk.RESTSdkException import WrongDataException, WrongJsonException
+from postg_rest_sdk.RESTSdkException import WrongDataException, WrongJsonException, WrongDataBaseException
 from postg_rest_sdk.models import PublicModel
 from postg_rest_sdk.utils import build_req_data
 
@@ -43,20 +43,6 @@ class SqlRequest():
         '''
         return self.action('update', **kwargs)
 
-    def get_instance(self, **kwargs):
-        '''
-        更新数据
-
-        :param kwargs:
-        :return:
-        '''
-        result = self.action('get', **kwargs)
-        if result['code'] == 200 and result['response_data']:
-            instance_dict = result['response_data'][0]
-            return PublicModel(instance_dict)
-        else:
-            return None
-
     # def delete(self, **kwargs):
     #     '''
     #     删除数据，禁用
@@ -64,7 +50,8 @@ class SqlRequest():
     #     '''
     #     return self.action('delete', **kwargs)
 
-    def action(self, method=None, data=None, json=None, rtype=None, order=None, change_all_table=False):
+    def action(self, method=None, data=None, json=None, rtype=None, order=None, change_all_table=False,
+               return_instance=False):
         headers = dict()
         # 规定了客户端与服务器的数据类型都是json
         headers['accept'] = 'application/json'
@@ -120,4 +107,14 @@ class SqlRequest():
             raise WrongDataException(
                 'method({}) is not allowed.'.format(method))
 
-        return dict(code=resp.status_code, response_data=resp.json())
+        code = resp.status_code
+        if str(code).startswith('2'):
+            response_data = resp.json()
+            if return_instance and len(response_data) >= 1:
+                instance_dict = response_data[0]
+                instance = PublicModel(instance_dict)
+                return instance
+            else:
+                return response_data
+        else:
+            raise WrongDataBaseException(resp.text)
