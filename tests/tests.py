@@ -1,7 +1,7 @@
 from postg_rest_sdk import SqlRequest
 
-DBURL = 'http://127.0.0.1:3000/'
-DBNAME = 'cl'
+DBURL = 'http://118.89.236.99:3001/'
+DBNAME = 'alipay_OpenUser'
 
 
 class T():
@@ -30,8 +30,19 @@ class T():
         :return:
         '''
         sr = self.get_sr()
-        data = {'glbm': 'like 4103*', 'glbmmc': '= 洛阳市公安局交通管理支队'}
+        data = {'alipay_user_id': '= 2088102169075850'}
         result = sr.get(data=data)
+        self.print_result(result)
+
+    def t21(self):
+        '''
+        行查询，rtype 关键字 default
+
+        :return:
+        '''
+        sr = self.get_sr()
+        data = {'alipay_user_id': '= 2088102169075850'}
+        result = sr.get_instance(data=data)
         self.print_result(result)
 
     def t3(self):
@@ -103,8 +114,8 @@ class T():
         :return:
         '''
         sr = self.get_sr()
-        data = dict(glbm='= 00')  # 查询条件
-        json = dict(zsdwnm='1243124', glbmmc='12421342345')  # 更新数据
+        data = dict(alipay_user_id='= 2088102169075850')  # 查询条件
+        json = dict(name='叶孟豪', id_card='411330199405223118', phone='18338216907')  # 更新数据
         result = sr.update(data=data, json=json)
         self.print_result(result)
 
@@ -121,10 +132,7 @@ class T():
 
     def print_result(self, result):
         print('------')
-        print(result.text)
-        print('------')
-        print('------')
-        print(result.json())
+        print(result)
         print('------')
 
 
@@ -132,11 +140,12 @@ if __name__ == '__main__':
     t = T()
     # t.t1()
     # t.t2()
+    t.t21()
     # t.t3()
     # t.t4()
     # t.t5()
     # t.t6()
     # t.t7()
-    t.t8()
+    # t.t8()
     # t.t9()
     pass

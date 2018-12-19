@@ -1,3 +1,9 @@
+try:
+    from .RESTSdkException import WrongDataException, WrongRtypeException
+except:
+    from RESTSdkException import WrongDataException, WrongRtypeException
+
+
 def build_req_data(data=None, rtype=None, order=None):
     '''
     构造请求数据
@@ -16,15 +22,14 @@ def build_req_data(data=None, rtype=None, order=None):
             for k, v in data.items():
                 req_data[k] = transform_value(v)
         else:
-            raise Exception('{} data type wrong'.format(rtype))
+            raise WrongDataException('{} data type wrong'.format(rtype))
 
     elif rtype in ('or', 'and'):
         if isinstance(data, dict):
             l = [k + '.' + transform_value(vv) for k, v in data.items() for vv in v.split('&')]
             req_data[rtype] = '{}{}{}'.format('(', ','.join(l), ')')
-            print(req_data)
         else:
-            raise Exception('{} data type wrong'.format(rtype))
+            raise WrongDataException('{} data type wrong'.format(rtype))
 
     elif rtype == 'select':
         if isinstance(data, str):
@@ -35,14 +40,16 @@ def build_req_data(data=None, rtype=None, order=None):
         #     l = [k + '.' + self.transform_value(v) for k, v in data.items()]
         #     req_data['select'] = ','.join(l)
         else:
-            raise Exception('{} data type wrong'.format(rtype))
+            raise WrongDataException('{} data type wrong'.format(rtype))
+    else:
+        raise WrongRtypeException('rtype({}) is not allowd'.format(rtype))
 
     if order:
         if isinstance(order, dict):
             l = [k + '.' + v for k, v in order.items()]
             req_data['order'] = ','.join(l)
         else:
-            raise Exception('{} data type wrong'.format('order'))
+            raise WrongDataException('{} data type wrong'.format('order'))
     return req_data
 
 

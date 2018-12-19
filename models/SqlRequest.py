@@ -1,9 +1,8 @@
 import requests
 
-try:
-    from .utils import build_req_data
-except:
-    from utils import build_req_data
+from postg_rest_sdk.RESTSdkException import WrongDataException, WrongJsonException
+from postg_rest_sdk.models import PublicModel
+from postg_rest_sdk.utils import build_req_data
 
 
 class SqlRequest():
@@ -44,6 +43,20 @@ class SqlRequest():
         '''
         return self.action('update', **kwargs)
 
+    def get_instance(self, **kwargs):
+        '''
+        更新数据
+
+        :param kwargs:
+        :return:
+        '''
+        result = self.action('get', **kwargs)
+        if result['code'] == 200 and result['response_data']:
+            instance_dict = result['response_data'][0]
+            return PublicModel(instance_dict)
+        else:
+            return None
+
     # def delete(self, **kwargs):
     #     '''
     #     删除数据，禁用
@@ -61,21 +74,19 @@ class SqlRequest():
         if method == 'get':
             req_data = build_req_data(data, rtype, order)
             resp = requests.get(self.target, headers=headers, params=req_data, timeout=5)
-            return resp
 
         elif method == 'insert':
 
             if not json:
-                raise Exception('json must be not None at post method')
+                raise WrongJsonException('json must be not None at post method')
 
             resp = requests.post(self.target, headers=headers, json=json, timeout=5)
-            return resp
 
         # elif method == 'upsert':
         #     headers['Prefer'] = 'resolution=merge-duplicates'
         #
         #     if not json:
-        #         raise Exception('json must be not None at post method')
+        #         raise WrongJsonException('json must be not None at post method')
         #
         #     print(json)
         #     resp = requests.put(self.target, headers=headers, json=json, timeout=5)
@@ -86,18 +97,18 @@ class SqlRequest():
         elif method == 'update':
 
             if not (data or change_all_table):
-                raise Exception(
+                raise WrongDataException(
                     'data is None,this operating will update the whole table.'
                     'if you want to do, please set the change_all_table is true')
 
             req_data = build_req_data(data=data, order=order)
             resp = requests.patch(self.target, headers=headers, params=req_data, json=json, timeout=5)
-            return resp
+
 
         # elif method == 'delete': # 禁用
         #
         #     if not (data or change_all_table):
-        #         raise Exception(
+        #         raise WrongDataException(
         #             'data is None,this operating will update the whole table.'
         #             'if you want to do, please set the change_all_table is true')
         #
@@ -105,3 +116,8 @@ class SqlRequest():
         #     resp = requests.delete(self.target, headers=headers, params=req_data, timeout=5)
         #     print(resp.url)
         #     return resp
+        else:
+            raise WrongDataException(
+                'method({}) is not allowed.'.format(method))
+
+        return dict(code=resp.status_code, response_data=resp.json())
