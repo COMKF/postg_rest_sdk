@@ -50,7 +50,7 @@ class SqlRequest():
     #     '''
     #     return self.action('delete', **kwargs)
 
-    def action(self, method=None, data=None, json=None, rtype=None, order=None, change_all_table=False,
+    def action(self, method=None, data=None, json=None, change_all_table=False,
                return_instance=False):
         headers = dict()
         # 规定了客户端与服务器的数据类型都是json
@@ -59,7 +59,7 @@ class SqlRequest():
         headers['Prefer'] = 'return=representation'
 
         if method == 'get':
-            req_data = build_req_data(data, rtype, order)
+            req_data = build_req_data(data)
             resp = requests.get(self.target, headers=headers, params=req_data, timeout=5)
 
         elif method == 'insert':
@@ -88,7 +88,7 @@ class SqlRequest():
                     'data is None,this operating will update the whole table.'
                     'if you want to do, please set the change_all_table is true')
 
-            req_data = build_req_data(data=data, order=order)
+            req_data = build_req_data(data)
             resp = requests.patch(self.target, headers=headers, params=req_data, json=json, timeout=5)
 
 
@@ -99,7 +99,7 @@ class SqlRequest():
         #             'data is None,this operating will update the whole table.'
         #             'if you want to do, please set the change_all_table is true')
         #
-        #     req_data = build_req_data(data, rtype, order)
+        #     req_data = build_req_data(data)
         #     resp = requests.delete(self.target, headers=headers, params=req_data, timeout=5)
         #     print(resp.url)
         #     return resp

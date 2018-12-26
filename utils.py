@@ -4,7 +4,7 @@ except:
     from RESTSdkException import WrongDataException, WrongRtypeException
 
 
-def build_req_data(data=None, rtype=None, order=None):
+def build_req_data(data=None):
     '''
     构造请求数据
 
@@ -17,39 +17,34 @@ def build_req_data(data=None, rtype=None, order=None):
     if not data:
         return None
 
-    if rtype in ('default', None):
-        if isinstance(data, dict):
-            for k, v in data.items():
-                req_data[k] = transform_value(v)
-        else:
-            raise WrongDataException('{} data type wrong'.format(rtype))
+    for key, value in data.items():
+        if key == 'select':
+            if isinstance(value, str):
+                req_data['select'] = value
+            elif isinstance(value, (list, tuple)):
+                req_data['select'] = ','.join(value)
+            else:
+                raise WrongDataException('{} data type wrong'.format('select'))
 
-    elif rtype in ('or', 'and'):
-        if isinstance(data, dict):
-            l = [k + '.' + transform_value(vv) for k, v in data.items() for vv in v.split('&')]
-            req_data[rtype] = '{}{}{}'.format('(', ','.join(l), ')')
-        else:
-            raise WrongDataException('{} data type wrong'.format(rtype))
+        elif key in ('or', 'and'):
+            if isinstance(value, dict):
+                l = [k + '.' + transform_value(vv) for k, v in value.items() for vv in v.split('&')]
+                req_data[key] = '{}{}{}'.format('(', ','.join(l), ')')
+            else:
+                raise WrongDataException('{} data type wrong'.format(key))
 
-    elif rtype == 'select':
-        if isinstance(data, str):
-            req_data['select'] = data
-        elif isinstance(data, (list, tuple)):
-            req_data['select'] = ','.join(data)
-        # elif isinstance(data, dict):
-        #     l = [k + '.' + self.transform_value(v) for k, v in data.items()]
-        #     req_data['select'] = ','.join(l)
+        elif key == 'order':
+            if isinstance(value, str):
+                req_data['order'] = value
+            elif isinstance(value, (list, tuple)):
+                req_data['order'] = ','.join(value)
+            elif isinstance(value, dict):
+                l = [k + '.' + v for k, v in value.items()]
+                req_data['order'] = ','.join(l)
+            else:
+                raise WrongDataException('{} data type wrong'.format('order'))
         else:
-            raise WrongDataException('{} data type wrong'.format(rtype))
-    else:
-        raise WrongRtypeException('rtype({}) is not allowd'.format(rtype))
-
-    if order:
-        if isinstance(order, dict):
-            l = [k + '.' + v for k, v in order.items()]
-            req_data['order'] = ','.join(l)
-        else:
-            raise WrongDataException('{} data type wrong'.format('order'))
+            req_data[key] = transform_value(value)
     return req_data
 
 
