@@ -114,7 +114,6 @@ PostgREST示例数据库表为：cl
         
       json = dict(glbm='00', zsdwnm='11', glbmmc='22')  # 单个
       result = sr.insert(json=json)
-      self.print_result(result)
 
     结果如下：
     
@@ -126,7 +125,6 @@ PostgREST示例数据库表为：cl
 
       json = [dict(glbm='55', zsdwnm='11', glbmmc='22'), dict(glbm='66', zsdwnm='11', glbmmc='22')]  # 批量插入
       result = sr.insert(json=json)
-      self.print_result(result)
 
     结果如下：
     
@@ -143,7 +141,6 @@ PostgREST示例数据库表为：cl
       data = dict(glbm='= 00')  # 查询条件
       json = dict(zsdwnm='1243124', glbmmc='12421342345')  # 更新数据
       result = sr.update(data=data, json=json)
-      self.print_result(result)
 
     结果如下：
     
@@ -159,9 +156,40 @@ PostgREST示例数据库表为：cl
 sdk禁用该方法
 
 
+## 特殊：获取实例
+
+当需要获取一条具体的实例数据，而不是一个list的时候，可以加上return_instance参数并将其赋值为True，示例如下:
+
+    data = {'glbm': 'like 4103*', 'glbmmc': '= 洛阳市'}
+    result = sr.get(data=data,return_instance=True) 
+  
+结果如下：
+
+    {'glbm': '410300', 'glbmmc': '洛阳市', 'zsdwnm': '000'}
+  
+注意：
+* 若get方法获取到了多个数据，会取第一个数据构造实例。
+* 该实例支持.运算符，即可以通过 result.glbm 取得410300这个值。
+
+## 特殊：获取查询url
+通过 get_query 方法和 query 属性，可以获得构造的 PostgREST 的url，方便大家学习，示例如下：
+
+    data = {'xzqh': '= 4103'}
+    sr.get_query(data)
+    sr.query
+    result = sr.get(data=data)
+    sr.query
+    
+结果如下：
+
+    http://118.89.236.99:3000/xzqh_status?xzqh=eq.4103
+
+注意：
+* get_query方法需要传入参数data（查询条件）。
+* 每次使用 get_query 或其他方法后，都会保存查询url为query属性值，方便下次直接使用。
 
 ### 更新日志
 
 * 2018-12-12 初版
 * 2018-12-13 增加插入数据、更新数据方法
-* 2018-12-26 更新查询方法
+* 2018-12-26 更新查询方法，更新test示例，更新获取实例和PostgREST的url的方法

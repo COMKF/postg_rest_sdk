@@ -1,4 +1,5 @@
 import requests
+from requests import PreparedRequest
 
 from postg_rest_sdk.RESTSdkException import WrongDataException, WrongJsonException, WrongDataBaseException
 from postg_rest_sdk.models import PublicModel
@@ -12,6 +13,7 @@ class SqlRequest():
             '' if DBURL.endswith('/') else '/')
         self.DBNAME = DBNAME.rstrip('/')
         self.target = self.DBURL + self.DBNAME
+        self.query = None
 
     def get(self, **kwargs):
         '''
@@ -50,8 +52,7 @@ class SqlRequest():
     #     '''
     #     return self.action('delete', **kwargs)
 
-    def action(self, method=None, data=None, json=None, change_all_table=False,
-               return_instance=False):
+    def action(self, method=None, data=None, json=None, change_all_table=False, return_instance=False):
         headers = dict()
         # 规定了客户端与服务器的数据类型都是json
         headers['accept'] = 'application/json'
@@ -91,7 +92,6 @@ class SqlRequest():
             req_data = build_req_data(data)
             resp = requests.patch(self.target, headers=headers, params=req_data, json=json, timeout=5)
 
-
         # elif method == 'delete': # 禁用
         #
         #     if not (data or change_all_table):
@@ -107,6 +107,8 @@ class SqlRequest():
             raise WrongDataException(
                 'method({}) is not allowed.'.format(method))
 
+        self.query = resp.url
+
         code = resp.status_code
         if str(code).startswith('2'):
             response_data = resp.json()
@@ -118,3 +120,10 @@ class SqlRequest():
                 return response_data
         else:
             raise WrongDataBaseException(resp.text)
+
+    def get_query(self, data=None):
+        p = PreparedRequest()
+        req_data = build_req_data(data)
+        p.prepare_url(self.target, req_data)  # 该方法只是其中一个方法，这个方法就是专门拼接params与url的，生成 EncodeUrl。
+        self.query = p.url
+        return self.query

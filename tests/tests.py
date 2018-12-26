@@ -1,7 +1,7 @@
 from postg_rest_sdk import SqlRequest
 
-DBURL = 'http://118.89.236.99:3001/'
-DBNAME = 'alipay_OpenUser'
+DBURL = 'http://118.89.236.99:3000/'
+DBNAME = 'xzqh_status'
 
 
 class T():
@@ -25,61 +25,63 @@ class T():
 
     def t2(self):
         '''
-        行查询，rtype 关键字 default
+        行查询
 
         :return:
         '''
         sr = self.get_sr()
-        data = {'alipay_user_id': '= 2088102169075850'}
+        data = {'xzqh': '= 4103'}
         result = sr.get(data=data)
         self.print_result(result)
 
     def t21(self):
         '''
-        行查询，rtype 关键字 default
+        行查询，获取实例
 
         :return:
         '''
         sr = self.get_sr()
-        data = {'alipay_user_id': '= 2088102169075850'}
-        result = sr.get_instance(data=data)
+        data = {'xzqh': '= 4103'}
+        result = sr.get(data=data, return_instance=True)
         self.print_result(result)
 
     def t3(self):
         '''
-        行查询，rtype 关键字 or
+        行查询，关键字 or/and
 
         :return:
         '''
         sr = self.get_sr()
-        data = {'glbm': 'like 4103*&like 4104*'}
-        rtype = 'or'
-        result = sr.get(data=data, rtype=rtype)
+        data = dict()
+        data['or'] = {'xzqh': 'like 4103*&like 4104*'}
+        result = sr.get(data=data)
         self.print_result(result)
+
 
     def t4(self):
         '''
-        列查询，rtype 关键字 select
+        列查询，关键字 select
 
         :return:
         '''
         sr = self.get_sr()
-        data = ('glbm', 'glbmmc')
-        rtype = 'select'
-        result = sr.get(data=data, rtype=rtype)
+        data = dict()
+        data['select'] = ('xzqh', 'dsmc')
+        result = sr.get(data=data)
         self.print_result(result)
 
     def t5(self):
         '''
-        排序，order
+        排序，关键字 order
 
         :return:
         '''
         sr = self.get_sr()
-        data = ('glbm', 'glbmmc')
-        rtype = 'select'
-        order = {'glbm': 'desc', 'glbmmc': 'desc'}
-        result = sr.get(data=data, rtype=rtype, order=order)
+        data = dict()
+        data['order'] = {'xzqh': 'desc', 'dsmc': 'desc'}
+        # data['order'] = ('xzqh.desc', 'dsmc')
+        # data['order'] = ('xzqh')
+        result = sr.get(data=data)
         self.print_result(result)
 
     def t6(self):
@@ -130,6 +132,19 @@ class T():
     #     result = sr.delete(data=data)
     #     self.print_result(result)
 
+    def t10(self):
+        '''
+        获取查询url
+
+        :return:
+        '''
+        sr = self.get_sr()
+        data = {'xzqh': '= 4103'}
+        result = sr.get(data=data)
+        self.print_result(result)
+        print(sr.query)
+
+
     def print_result(self, result):
         print('------')
         print(result)
@@ -140,7 +155,7 @@ if __name__ == '__main__':
     t = T()
     # t.t1()
     # t.t2()
-    t.t21()
+    # t.t21()
     # t.t3()
     # t.t4()
     # t.t5()
@@ -148,4 +163,5 @@ if __name__ == '__main__':
     # t.t7()
     # t.t8()
     # t.t9()
+    t.t10()
     pass
